@@ -176,22 +176,12 @@ void readProcMem(std::string pid_str, Process& proc){
     
     while (std::getline(status_file, line)) {
         if (line.find("VmRSS:") == 0) {
-            // Extract the number (format: "VmRSS:   12345 kB")
-            size_t start = line.find(':') + 1;
-            size_t end = line.find("kB");
-            std::string num_str = line.substr(start, end - start);
-            
-            // Remove whitespace
-            num_str.erase(0, num_str.find_first_not_of(" \t"));
-            num_str.erase(num_str.find_last_not_of(" \t") + 1);
-            
-            if (!num_str.empty()) {
-                proc.mem_kb = std::stoul(num_str);
-            }
+            sscanf(line.c_str(), "VmRSS: %lu kB", &proc.mem_kb);
             break;
         }
     }
 }
+
 void readTotMem(){
     std::ifstream meminfo("/proc/meminfo"); // mem info in kb
     std::string line;
@@ -282,9 +272,9 @@ void displayProcesses(const std::unordered_map<pid_t, Process>& processes_map) {
         sorted_processes.push_back(&proc);
     }
     
-    std::sort(sorted_processes.begin(), sorted_processes.end(), //highest CPU usage first
+    std::sort(sorted_processes.begin(), sorted_processes.end(), //highest Ram usage first
               [](const Process* a, const Process* b) { 
-                  return a->cpu_percent > b->cpu_percent; 
+                  return a->mem_kb > b->mem_kb; 
               });
     
     std::cout << std::left 
@@ -296,7 +286,7 @@ void displayProcesses(const std::unordered_map<pid_t, Process>& processes_map) {
     
     std::cout << std::string(45, '-') << "\n";
     
-    int limit = std::min(15, (int)sorted_processes.size());
+    int limit = (int)sorted_processes.size();// std::min(15, (int)sorted_processes.size());
     for (int i = 0; i < limit; i++) {
         const Process* p = sorted_processes[i];
         std::cout << std::left 
