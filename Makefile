@@ -1,8 +1,8 @@
 CXX := g++
 CXXFLAGS := -std=c++17 -O2 -Wall -Wextra -I. -Wno-sign-compare
-SRCS := main.cpp 
+SRCS := system_monitor.cpp 
 OBJS := $(SRCS:.cpp=.o)
-TARGET := proc_scan
+TARGET := system_monitor
 
 .PHONY: all clean
 
